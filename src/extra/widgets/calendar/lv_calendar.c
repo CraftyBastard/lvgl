@@ -37,7 +37,7 @@ static void highlight_update(lv_obj_t * calendar);
 const lv_obj_class_t lv_calendar_class = {
     .constructor_cb = lv_calendar_constructor,
     .width_def = (LV_DPI_DEF * 3) / 2,
-    .height_def =(LV_DPI_DEF * 3) / 2,
+    .height_def = (LV_DPI_DEF * 3) / 2,
     .group_def = LV_OBJ_CLASS_GROUP_DEF_TRUE,
     .instance_size = sizeof(lv_calendar_t),
     .base_class = &lv_btnmatrix_class
@@ -56,7 +56,7 @@ static const char * day_names_def[7] = LV_CALENDAR_DEFAULT_DAY_NAMES;
 
 lv_obj_t * lv_calendar_create(lv_obj_t * parent)
 {
-    LV_LOG_INFO("begin")
+    LV_LOG_INFO("begin");
     lv_obj_t * obj = lv_obj_class_create_obj(&lv_calendar_class, parent);
     lv_obj_class_init_obj(obj);
     return obj;
@@ -135,6 +135,12 @@ void lv_calendar_set_showed_date(lv_obj_t * obj, uint32_t year, uint32_t month)
     }
 
     highlight_update(obj);
+
+    /*Reset the focused button if the days changes*/
+    if(lv_btnmatrix_get_selected_btn(obj) != LV_BTNMATRIX_BTN_NONE) {
+        lv_btnmatrix_set_selected_btn(obj, day_first + 7);
+    }
+
     lv_obj_invalidate(obj);
 }
 
@@ -232,9 +238,11 @@ static void lv_calendar_constructor(const lv_obj_class_t * class_p, lv_obj_t * o
         /*Every 8th string is "\n"*/
         if(i != 0 && (i + 1) % 8 == 0) {
             calendar->map[i] = "\n";
-        } else if(i < 8){
+        }
+        else if(i < 8) {
             calendar->map[i] = day_names_def[i];
-        } else {
+        }
+        else {
             calendar->nums[j][0] = 'x';
             calendar->map[i] = calendar->nums[j];
             j++;
@@ -339,7 +347,7 @@ static uint8_t get_day_of_week(uint32_t year, uint32_t month, uint32_t day)
     uint32_t day_of_week = (day + (31 * (month - 2 + 12 * a) / 12) + b + (b / 4) - (b / 100) + (b / 400)) % 7;
 #endif
 
-    return day_of_week;
+    return day_of_week  ;
 }
 
 static void highlight_update(lv_obj_t * obj)
@@ -350,17 +358,18 @@ static void highlight_update(lv_obj_t * obj)
     /*Clear all kind of selection*/
     lv_btnmatrix_clear_btn_ctrl_all(obj, LV_CALENDAR_CTRL_TODAY | LV_CALENDAR_CTRL_HIGHLIGHT);
 
+    uint8_t day_first = get_day_of_week(calendar->showed_date.year, calendar->showed_date.month, 1);
     if(calendar->highlighted_dates) {
         for(i = 0; i < calendar->highlighted_dates_num; i++) {
-            if(calendar->highlighted_dates[i].year == calendar->today.year && calendar->highlighted_dates[i].month == calendar->showed_date.month) {
-                lv_btnmatrix_set_btn_ctrl(obj, calendar->highlighted_dates[i].day + 7, LV_CALENDAR_CTRL_HIGHLIGHT);
+            if(calendar->highlighted_dates[i].year == calendar->showed_date.year &&
+               calendar->highlighted_dates[i].month == calendar->showed_date.month) {
+                lv_btnmatrix_set_btn_ctrl(obj, calendar->highlighted_dates[i].day - 1 + day_first + 7, LV_CALENDAR_CTRL_HIGHLIGHT);
             }
         }
     }
 
     if(calendar->showed_date.year == calendar->today.year && calendar->showed_date.month == calendar->today.month) {
-        uint8_t day_first = get_day_of_week(calendar->today.year, calendar->today.month, 0);
-        lv_btnmatrix_set_btn_ctrl(obj, calendar->today.day + day_first + 7, LV_CALENDAR_CTRL_TODAY);
+        lv_btnmatrix_set_btn_ctrl(obj, calendar->today.day - 1 + day_first + 7, LV_CALENDAR_CTRL_TODAY);
     }
 }
 

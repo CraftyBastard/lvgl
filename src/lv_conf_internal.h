@@ -46,10 +46,8 @@
 /*----------------------------------
  * Start parsing lv_conf_template.h
  -----------------------------------*/
-/* clang-format off */
 
 #include <stdint.h>
-
 
 /*====================
    COLOR SETTINGS
@@ -60,11 +58,11 @@
 #  ifdef CONFIG_LV_COLOR_DEPTH
 #    define LV_COLOR_DEPTH CONFIG_LV_COLOR_DEPTH
 #  else
-#    define  LV_COLOR_DEPTH     32
+#    define  LV_COLOR_DEPTH     16
 #  endif
 #endif
 
-/*Swap the 2 bytes of RGB565 color. Useful if the display has a 8 bit interface (e.g. SPI)*/
+/*Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI)*/
 #ifndef LV_COLOR_16_SWAP
 #  ifdef CONFIG_LV_COLOR_16_SWAP
 #    define LV_COLOR_16_SWAP CONFIG_LV_COLOR_16_SWAP
@@ -84,7 +82,7 @@
 #  endif
 #endif
 
-/*Images pixels with this color will not be drawn if they are  chroma keyed)*/
+/*Images pixels with this color will not be drawn if they are chroma keyed)*/
 #ifndef LV_COLOR_CHROMA_KEY
 #  ifdef CONFIG_LV_COLOR_CHROMA_KEY
 #    define LV_COLOR_CHROMA_KEY CONFIG_LV_COLOR_CHROMA_KEY
@@ -123,6 +121,12 @@
 #    define  LV_MEM_ADR          0     /*0: unused*/
 #  endif
 #endif
+/*Instead of an address give a memory allocator that will be called to get a memory pool for LVGL. E.g. my_malloc*/
+#if LV_MEM_ADR == 0
+//#define LV_MEM_POOL_INCLUDE   your_alloc_library  /* Uncomment if using an external allocator*/
+//#define LV_MEM_POOL_ALLOC     your_alloc          /* Uncomment if using an external allocator*/
+#endif
+
 #else       /*LV_MEM_CUSTOM*/
 #ifndef LV_MEM_CUSTOM_INCLUDE
 #  ifdef CONFIG_LV_MEM_CUSTOM_INCLUDE
@@ -167,7 +171,7 @@
    HAL SETTINGS
  *====================*/
 
-/*Default display refresh period. LVG will redraw changed ares with this period time*/
+/*Default display refresh period. LVG will redraw changed areas with this period time*/
 #ifndef LV_DISP_DEF_REFR_PERIOD
 #  ifdef CONFIG_LV_DISP_DEF_REFR_PERIOD
 #    define LV_DISP_DEF_REFR_PERIOD CONFIG_LV_DISP_DEF_REFR_PERIOD
@@ -286,6 +290,7 @@
 #    define  LV_DISP_ROT_MAX_BUF         (10*1024)
 #  endif
 #endif
+
 /*-------------
  * GPU
  *-----------*/
@@ -340,6 +345,49 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #  else
 #    define  LV_USE_GPU_NXP_VG_LITE   0
 #  endif
+#endif
+
+/*Use SDL renderer API*/
+#ifndef LV_USE_GPU_SDL
+#  ifdef CONFIG_LV_USE_GPU_SDL
+#ifndef LV_USE_GPU_SDL
+#  ifdef CONFIG_LV_USE_GPU_SDL
+#    define LV_USE_GPU_SDL CONFIG_LV_USE_GPU_SDL
+#  else
+#    define  LV_USE_GPU_SDL CONFIG_LV_USE_GPU_SDL
+#  endif
+#endif
+#  else
+#    define  LV_USE_GPU_SDL   0
+#  endif
+#endif
+#if LV_USE_GPU_SDL
+#ifndef LV_USE_EXTERNAL_RENDERER
+#  ifdef CONFIG_LV_USE_EXTERNAL_RENDERER
+#    define LV_USE_EXTERNAL_RENDERER CONFIG_LV_USE_EXTERNAL_RENDERER
+#  else
+#    define  LV_USE_EXTERNAL_RENDERER 1
+#  endif
+#endif
+#  ifndef LV_GPU_SDL_INCLUDE
+#ifndef LV_GPU_SDL_INCLUDE_PATH
+#  ifdef CONFIG_LV_GPU_SDL_INCLUDE_PATH
+#    define LV_GPU_SDL_INCLUDE_PATH CONFIG_LV_GPU_SDL_INCLUDE_PATH
+#  else
+#    define  LV_GPU_SDL_INCLUDE_PATH <SDL2/SDL.h>
+#  endif
+#endif
+#  endif
+#endif
+
+#ifndef LV_USE_EXTERNAL_RENDERER
+#ifndef LV_USE_EXTERNAL_RENDERER
+#  ifdef CONFIG_LV_USE_EXTERNAL_RENDERER
+#    define LV_USE_EXTERNAL_RENDERER CONFIG_LV_USE_EXTERNAL_RENDERER
+#  else
+#    define  LV_USE_EXTERNAL_RENDERER 0
+#  endif
+#endif
 #endif
 
 /*-------------
@@ -512,7 +560,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #  endif
 #endif
 
-/*1: Show the used memory and the memory fragmentation  in the left bottom corner
+/*1: Show the used memory and the memory fragmentation in the left bottom corner
  * Requires LV_MEM_CUSTOM = 0*/
 #ifndef LV_USE_MEM_MONITOR
 #  ifdef CONFIG_LV_USE_MEM_MONITOR
@@ -580,7 +628,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #endif
 
 /*Garbage Collector settings
- *Used if lvgl is binded to higher level language and the memory is managed by that language*/
+ *Used if lvgl is bound to higher level language and the memory is managed by that language*/
 #ifndef LV_ENABLE_GC
 #  ifdef CONFIG_LV_ENABLE_GC
 #    define LV_ENABLE_GC CONFIG_LV_ENABLE_GC
@@ -1047,7 +1095,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #endif
 
 /*Support bidirectional texts. Allows mixing Left-to-Right and Right-to-Left texts.
- *The direction will be processed according to the Unicode Bidirectioanl Algorithm:
+ *The direction will be processed according to the Unicode Bidirectional Algorithm:
  *https://www.w3.org/International/articles/inline-bidi-markup/uba-basics*/
 #ifndef LV_USE_BIDI
 #  ifdef CONFIG_LV_USE_BIDI
@@ -1141,7 +1189,6 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #    define  LV_USE_CHECKBOX     1
 #  endif
 #endif
-
 
 #ifndef LV_USE_DROPDOWN
 #  ifdef CONFIG_LV_USE_DROPDOWN
@@ -1437,6 +1484,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 /*-----------
  * Themes
  *----------*/
+
 /*A simple, impressive and very complete theme*/
 #ifndef LV_USE_THEME_DEFAULT
 #  ifdef CONFIG_LV_USE_THEME_DEFAULT
@@ -1475,7 +1523,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #endif
 #endif /*LV_USE_THEME_DEFAULT*/
 
-/*An very simple them that is a good starting point for a custom theme*/
+/*A very simple theme that is a good starting point for a custom theme*/
 #ifndef LV_USE_THEME_BASIC
 #  ifdef CONFIG_LV_USE_THEME_BASIC
 #    define LV_USE_THEME_BASIC CONFIG_LV_USE_THEME_BASIC
